@@ -3,8 +3,14 @@
 import numpy as np
 
 
+def _validate_delta(delta: float) -> None:
+    if delta <= 0:
+        raise ValueError("delta must be positive")
+
+
 def mu1(x: float, delta: float) -> float:
-    """Левая трапециевидная функция принадлежности."""
+    """Left trapezoidal membership function."""
+    _validate_delta(delta)
     if x <= -delta:
         return 1.0
     if x >= delta:
@@ -13,12 +19,12 @@ def mu1(x: float, delta: float) -> float:
 
 
 def mu2(x: float, delta: float) -> float:
-    """Правая трапециевидная функция принадлежности."""
+    """Right trapezoidal membership function."""
     return 1.0 - mu1(x, delta)
 
 
 def fuzzy_weights(x1: float, x2: float, delta: float) -> tuple[float, float, float, float]:
-    """Весовые коэффициенты w_ij для пары (x1, x2)."""
+    """Rule weights w_ij for (x1, x2)."""
     m1 = mu1(x1, delta)
     m2 = mu2(x1, delta)
     n1 = mu1(x2, delta)
@@ -32,7 +38,7 @@ def fuzzy_weights(x1: float, x2: float, delta: float) -> tuple[float, float, flo
 
 
 def regressor_vector(x1: float, x2: float, delta: float) -> np.ndarray:
-    """Вектор регрессоров размерности 12 для двухфакторной нечеткой линейной модели."""
+    """Regressor vector (size 12) for a two-factor fuzzy linear model."""
     w11, w12, w21, w22 = fuzzy_weights(x1, x2, delta)
     return np.array(
         [
@@ -54,5 +60,5 @@ def regressor_vector(x1: float, x2: float, delta: float) -> np.ndarray:
 
 
 def basis_vector(x1: float, x2: float, delta: float) -> np.ndarray:
-    """Совместимость с прежним кодом: теперь это 12‑мерный вектор регрессоров."""
+    """Backward-compatibility alias."""
     return regressor_vector(x1, x2, delta)
