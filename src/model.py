@@ -112,19 +112,28 @@ def build_spectrum(
 
 
 def analyze_matrix(M: np.ndarray, num_points: int, gamma: float = 1e-8) -> dict:
-    """Compute matrix metrics."""
+    """Compute matrix metrics using normalized information matrix M/N.
+
+    As in the lab manual and reference implementation, we report
+    characteristics for the normalized information matrix
+    M_norm = (1/N) * sum f(x) f(x)^T, where N = num_points.
+    """
+    if num_points <= 0:
+        raise ValueError("num_points must be positive")
+
     dim = M.shape[0]
-    A = M + gamma * np.eye(dim) if num_points < dim else M
+    M_norm = M / float(num_points)
+    A = M_norm + gamma * np.eye(dim) if num_points < dim else M_norm
     try:
         invA = np.linalg.inv(A)
     except np.linalg.LinAlgError:
         invA = np.linalg.pinv(A)
 
     trace_inv = float(np.trace(invA))
-    det = float(np.linalg.det(M))
-    rank = int(np.linalg.matrix_rank(M))
+    det = float(np.linalg.det(M_norm))
+    rank = int(np.linalg.matrix_rank(M_norm))
     try:
-        cond = float(np.linalg.cond(M))
+        cond = float(np.linalg.cond(M_norm))
     except np.linalg.LinAlgError:
         cond = float("inf")
 
